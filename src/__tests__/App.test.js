@@ -4,7 +4,7 @@ import {
   fireEvent,
   render,
   screen,
-  waitFor,
+  waitForElementToBeRemoved,
 } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { server } from "../mocks/server";
@@ -57,25 +57,24 @@ test("creates a new question when the form is submitted", async () => {
   expect(await screen.findByText(/lorem testum 1/g)).toBeInTheDocument();
 });
 
-test('deletes the question when the delete button is clicked', async () => {
-  render(<App />);
+test("deletes the question when the delete button is clicked", async () => {
+  const { rerender } = render(<App />);
 
-  // Ensure the question exists before firing the delete event
-  const questionText = "lorem testum 1";
-  const deleteButton = screen.queryByText("Delete Question");
+  fireEvent.click(screen.queryByText(/View Questions/));
 
-  // Make sure the delete button exists
-  expect(deleteButton).toBeInTheDocument();
+  await screen.findByText(/lorem testum 1/g);
 
-  // Simulate the click event to delete the question
-  fireEvent.click(deleteButton);
+  fireEvent.click(screen.queryAllByText("Delete Question")[0]);
 
-  // Wait for the question to be removed from the DOM
-  await waitFor(() => {
-    // The question should no longer be in the document
-    expect(screen.queryByText(questionText)).toBeNull();
-  });
+  await waitForElementToBeRemoved(() => screen.queryByText(/lorem testum 1/g));
+
+  rerender(<App />);
+
+  await screen.findByText(/lorem testum 2/g);
+
+  expect(screen.queryByText(/lorem testum 1/g)).not.toBeInTheDocument();
 });
+
 test("updates the answer when the dropdown is changed", async () => {
   const { rerender } = render(<App />);
 
