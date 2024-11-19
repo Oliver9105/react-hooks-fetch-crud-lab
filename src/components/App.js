@@ -15,6 +15,7 @@ function App() {
         setQuestions(data)
   })}, []);
 
+  
   function handleNewQuestion(newQ){
     setQuestions([...questions, newQ])
   }
